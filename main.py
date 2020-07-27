@@ -1,10 +1,13 @@
+import xml.etree.ElementTree as ElementTree
+
+
 class GoTo:
     def __init__(self, text, key):
         self.text = text
         self.key = key
 
 
-class Room:
+class Place:
     def __init__(self, text, options):
         self.text = text
         self.options = options
@@ -14,33 +17,40 @@ class Room:
         for k, v in self.options.items():
             print(k + " - " + v.text)
 
-    def get_next_room(self, key):
+    def get_next_place(self, key):
         return self.options[key].key
 
 
 class Interpreter:
-    def __init__(self, rooms, first_room):
-        self.rooms = rooms
-        self.current_room = rooms[first_room]
+    def __init__(self, places, first_place):
+        self.places = places
+        self.current_place = places[first_place]
 
     def run(self):
         while True:
             try:
-                self.current_room.display()
-                self.current_room = self.rooms[self.current_room.get_next_room(input())]
+                self.current_place.display()
+                self.current_place = self.places[self.current_place.get_next_place(input())]
             except KeyError:
                 pass
 
 
-lake = Room("You are near a lake. The sky is blue, with just a few clouds. "
-            "You can see on the other side of the lake a large castle. "
-            "Closer to you, there is a dark forest.",
-            {"1": GoTo("Go to the castle", "castle"), "2": GoTo("Enter the forest", "forest")})
+def parse_adventure(filename):
+    root = ElementTree.parse(filename).getroot()
+    start_place = root.attrib["start"]
+    places = {}
+    for place in root:
+        place_key = place.attrib["key"]
+        place_description = place.find("description").text
+        place_actions = {}
+        for action in place.find("actions"):
+            action_item = action.attrib["item"]
+            action_description = action.attrib["description"]
+            action_goto = action.attrib["goto"]
+            place_actions[action_item] = GoTo(action_description, action_goto)
+        places[place_key] = Place(place_description, place_actions)
+    return Interpreter(places, start_place)
 
-forest = Room("The forest is deep and silent. You see a beautiful sword stuck in a tree, and you grab it.",
-              {"1": GoTo("Go back to the lake", "lake")})
 
-all_rooms = {"lake": lake, "forest": forest}
-
-i = Interpreter(all_rooms, "lake")
+i = parse_adventure("adventure.xml")
 i.run()

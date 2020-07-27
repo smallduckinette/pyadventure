@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<adventure start="lake">
+    <place key="lake">
+        <description>You are near a lake. The sky is blue, with just a few clouds. You can see on the other side of the lake a large castle. Closer to you, there is a dark forest.</description>
+        <actions>
+            <action item="1" description="Go to the castle" goto="castle"/>
+            <action item="2" description="Go to the forest" goto="forest"/>
+        </actions>
+    </place>
+    <place key="forest">
+        <description>The forest is deep and silent. You see a beautiful sword stuck in a tree, and you grab it.</description>
+        <actions>
+            <action item="1" description="Go back to the lake" goto="lake"/>
+        </actions>
+    </place>
+</adventure>
