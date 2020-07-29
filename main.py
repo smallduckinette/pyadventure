@@ -7,18 +7,41 @@ class GoTo:
         self.key = key
 
 
+class Inventory:
+    def __init__(self, items):
+        self.items = items
+
+    def manage(self):
+        list_items = list(self.items.keys())
+        list_items.sort()
+        index = 1
+        print("*** Inventory ***")
+        for item in list_items:
+            print(str(index) + " - " + item + " (" + str(self.items[item]) + ")")
+            index += 1
+        print("*****************")
+
+
 class Place:
-    def __init__(self, text, options):
+    def __init__(self, text, options, inventory):
         self.text = text
         self.options = options
+        self.inventory = inventory
 
     def display(self):
         print(self.text)
         for k, v in self.options.items():
             print(k + " - " + v.text)
+        print("i - Inventory")
 
     def get_next_place(self, key):
-        return self.options[key].key
+        if key == "i":
+            self.inventory.manage()
+            return self
+        elif key == "q":
+            exit(0)
+        else:
+            return self.options[key].key
 
 
 class Interpreter:
@@ -39,6 +62,7 @@ def parse_adventure(filename):
     root = ElementTree.parse(filename).getroot()
     start_place = root.attrib["start"]
     places = {}
+    inventory = Inventory({"sword": 1, "gold coins": 50})
     for place in root:
         place_key = place.attrib["key"]
         place_description = place.find("description").text
@@ -48,7 +72,7 @@ def parse_adventure(filename):
             action_description = action.attrib["description"]
             action_goto = action.attrib["goto"]
             place_actions[action_item] = GoTo(action_description, action_goto)
-        places[place_key] = Place(place_description, place_actions)
+        places[place_key] = Place(place_description, place_actions, inventory)
     return Interpreter(places, start_place)
 
 
